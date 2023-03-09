@@ -155,7 +155,13 @@ def generate_padded_samples_old(source, output_length):
 
 def generate_padded_samples(original, source, output_length, sample_rate, types):
 	copy = np.zeros(output_length, dtype=np.float32)
+	if len(np.asarray(source).shape) > 1:
+		source = np.mean(source, axis=0)
+		original = np.mean(original, axis=0)
 	src_length = len(source)
+	if src_length > output_length:
+		src_length = output_length
+		source = source[:src_length]
 	left = output_length-src_length # amount to be padded
 	# pad front or back
 	prob = random.random()
@@ -167,9 +173,10 @@ def generate_padded_samples(original, source, output_length, sample_rate, types)
 	while len(aug) < left:
 		aug = np.concatenate([aug, aug])
 
+	#print(left, src_length, len(source), len(original))
 	if prob < 0.5:
 		#pad back
-		copy[left:] = source
+		copy[left:] = source[:]
 		copy[:left] = aug[len(aug)-left:]
 	else:
 		#pad front
